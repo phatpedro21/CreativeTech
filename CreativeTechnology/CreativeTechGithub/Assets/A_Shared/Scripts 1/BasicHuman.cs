@@ -12,7 +12,7 @@ public class BasicHuman : MonoBehaviour {
 	string humanFileName;
 	Vector3 accel = Vector3.zero;
 	Vector3 swerveVector = Vector3.zero;
-	Quaternion swerve;
+	public Quaternion swerve;
 	public Vector3 testVec =  Vector3.zero;
 	public int speed = 2;
 
@@ -39,7 +39,7 @@ public class BasicHuman : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
-		transform.LookAt (transform.position + desiredVely);
+	    transform.LookAt (this.transform.position + swerve * desiredVely);
 		if (pathList.Count > 0 && pathList[0] == null) 
 		{
 			pathList.RemoveAt(0);	
@@ -89,7 +89,7 @@ public class BasicHuman : MonoBehaviour {
 
 	void FixedUpdate()
 	{
-		this.transform.GetComponent<Rigidbody> ().velocity = desiredVely;
+		this.transform.GetComponent<Rigidbody> ().velocity = swerve * desiredVely;      
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -109,8 +109,13 @@ public class BasicHuman : MonoBehaviour {
 
 	public void setSwerve(Quaternion angle)
 	{
-		swerve = angle;
-	}
+        if (angle != Quaternion.identity)
+        {
+            swerve = angle;
+        }
+        //Debug.DrawRay(this.transform.position - new Vector3(0f,0f, 2f), angle * this.transform.forward, Color.white);
+        Debug.DrawRay(this.transform.position - new Vector3(0f, 0f, 2f), swerve * this.transform.forward, Color.white);
+    }
 
 	void ResetDestination ()
 	{

@@ -14,6 +14,10 @@ public class FixPathfindingPlease : MonoBehaviour {
 	KeyValuePair<GameObject, float> bestPair;
 
 
+    //DEBUG TIMER
+    float startTime, endTime, diffTime;
+
+
 	// Use this for initialization
 	void Start () {
 
@@ -27,8 +31,9 @@ public class FixPathfindingPlease : MonoBehaviour {
 
 	public Stack<GameObject> buildPath (GameObject _startNode, GameObject _endNode)
 	{
-		//CLEAR ALL
-		activeNodes.Clear();
+        startTime = Time.realtimeSinceStartup;
+        //CLEAR ALL
+        activeNodes.Clear();
 		remainingNodes.Clear();
 		visitedNodes.Clear();
 		path.Clear();
@@ -40,7 +45,7 @@ public class FixPathfindingPlease : MonoBehaviour {
 		totalNodes.AddRange(GameObject.FindGameObjectsWithTag ("Node"));
 		for (int i = 0; i < totalNodes.Count; i++) 
 		{
-			if(totalNodes[i].GetComponent<Node>().enabled == true)
+            if(totalNodes[i].GetComponent<Node>().enabled == true)
 			{
 				activeNodes.Add(totalNodes[i]);
 			}
@@ -66,7 +71,8 @@ public class FixPathfindingPlease : MonoBehaviour {
 		currentNode = startNode;
 
 		//Check every node
-		while (remainingNodes.Count > 0) 		
+		while (currentNode != endNode) 	 
+        	
 		{
 			//if current node has connections;
 			if(currentNode.GetComponent<Node>().connectedNodes.Count > 0)
@@ -124,10 +130,11 @@ public class FixPathfindingPlease : MonoBehaviour {
 			currentNode = values[activeNodes.IndexOf(currentNode)].Key;
 			path.Push(currentNode);
 		}
-		//path.Push(startNode);
+        //path.Push(startNode);
 
-	
 
+        endTime = Time.realtimeSinceStartup;
+        Debug.Log(endTime - startTime);
 		return path;
 	}
 

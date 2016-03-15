@@ -6,13 +6,16 @@ public class CollisionAvoidence : MonoBehaviour {
 
 	public float turnSpeed;
 	public float leftTurn, rightTurn;
-	bool turning;
+	public bool turningLeft, turningRight;
 
 	//for direct collisions (how much to turn out of path)
 	float turnAngle;
 
 	// Use this for initialization
 	void Start () {
+
+        turningLeft = false;
+        turningRight = false;
 
 		//turnAngle = Quaternion.AngleAxis (5, Vector3.up);
 	
@@ -21,28 +24,141 @@ public class CollisionAvoidence : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
-		if (transform.parent.GetComponent<CollisionAvoidenceTestMove> ())
+       /* if (turningRight && this.name.Contains("Left"))
+        {
+            Debug.Log("Right");
+            //Debug.Break();
+            rightTurn += turnSpeed;      
+            if(Quaternion.AngleAxis(rightTurn, new Vector3(0f, 1f, 0f)) != transform.parent.GetComponent<CollisionManager>().angle)
+            {
+                transform.parent.GetComponent<CollisionManager>().updateAngle(Quaternion.AngleAxis(rightTurn, new Vector3(0f, 1f, 0f)));
+            }      
+           // this.transform.parent.GetComponent<BasicHuman>().setSwerve((Quaternion.AngleAxis(rightTurn, new Vector3(0f, 1f, 0f))));
+            Debug.DrawRay(this.transform.position, (Quaternion.AngleAxis(rightTurn, new Vector3(0f, 1f, 0f)) * this.transform.forward), Color.red);    
+        }
+        else if (turningLeft && this.name.Contains("Right"))
+        {
+            Debug.Log("Left");
+            leftTurn += turnSpeed;
+            if (Quaternion.AngleAxis(leftTurn, new Vector3(0f, 1f, 0f)) != transform.parent.GetComponent<CollisionManager>().angle)
+            {
+                transform.parent.GetComponent<CollisionManager>().updateAngle(Quaternion.AngleAxis(-leftTurn, new Vector3(0f, 1f, 0f)));
+            }
+            // this.transform.parent.GetComponent<BasicHuman>().setSwerve((Quaternion.AngleAxis(rightTurn, new Vector3(0f, 1f, 0f))));
+            Debug.DrawRay(this.transform.position, (Quaternion.AngleAxis(-leftTurn, new Vector3(0f, 1f, 0f)) * this.transform.forward), Color.red);
+        }
+
+        if (!turningRight && rightTurn > 0f)
+        {        
+           rightTurn -= turnSpeed;
+        }
+        else
+        {
+           rightTurn = 0f;          
+        }
+        if (Quaternion.AngleAxis(rightTurn, new Vector3(0f, 1f, 0f)) != transform.parent.GetComponent<CollisionManager>().angle)
+        {
+             transform.parent.GetComponent<CollisionManager>().updateAngle(Quaternion.AngleAxis(rightTurn, new Vector3(0f, 1f, 0f)));
+        }               
+        
+        if (!turningLeft && leftTurn > 0f)
+        {
+           leftTurn -= turnSpeed;
+        }
+        else
+        { 
+           leftTurn = 0f;          
+        }
+        if (Quaternion.AngleAxis(rightTurn, new Vector3(0f, 1f, 0f)) != transform.parent.GetComponent<CollisionManager>().angle)
+        {
+            transform.parent.GetComponent<CollisionManager>().updateAngle(Quaternion.AngleAxis(-leftTurn, new Vector3(0f, 1f, 0f)));
+        }
+        if(!turningLeft && !turningRight && leftTurn == 0f && rightTurn == 0f)
+        {
+            transform.parent.transform.parent.GetComponent<BasicHuman>().swerve = new Quaternion(0f, 0f, 0f, 0f);
+        }*/
+    
+     }
+
+
+	void OnTriggerEnter(Collider other)
+	{
+        if (other.tag.Contains("Human") || other.tag.Contains("Obstacle"))
+        {
+            if (this.name.Contains("Left"))
+            {
+                transform.parent.GetComponent<CollisionManager>().turningRight = true;
+            }
+            if (this.name.Contains("Right"))
+            {
+                transform.parent.GetComponent<CollisionManager>().turningLeft = true;
+            }
+        }
+
+
+    }
+
+    void OnTriggerStay(Collider other)
+    {
+
+        if (other.tag.Contains("Human") || other.tag.Contains("Obstacle"))
+        {
+            if (this.name.Contains("Left") && !transform.parent.GetComponent<CollisionManager>().turningRight)
+            {
+                transform.parent.GetComponent<CollisionManager>().turningRight = true;
+            }
+            if (this.name.Contains("Right") && !transform.parent.GetComponent<CollisionManager>().turningLeft)
+            {
+                transform.parent.GetComponent<CollisionManager>().turningLeft = true;
+            }
+        }
+
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+
+        if (other.tag.Contains("Human") || other.tag.Contains("Obstacle"))
+        {
+            if (this.name.Contains("Left"))
+            {
+                transform.parent.GetComponent<CollisionManager>().turningRight = false;
+            }
+            if (this.name.Contains("Right"))
+            {
+                transform.parent.GetComponent<CollisionManager>().turningLeft = false;
+            }
+        }
+
+    }
+
+}
+
+
+
+/*
+if (transform.parent.GetComponent<CollisionAvoidenceTestMove> ())
 		{
 			if (transform.parent.GetComponent<CollisionAvoidenceTestMove> ().potentialCollisions.Count == 0) 
 			{
-				if (leftTurn > 0f) 
+
+                if (leftTurn > 0f) 
 				{
-					leftTurn -= turnSpeed * 3;
+                   leftTurn *= 0.9f;
 				}
-				else 
-				{
-					leftTurn = 0f;
+				else
+                {
+                   //leftTurn = 0f;
 				}
 				if (rightTurn > 0f) 
 				{
-					rightTurn -= turnSpeed * 3;
-				} 
+                   rightTurn *= 0.9f; 
+                } 
 				else
-				{
-					rightTurn = 0f;
+                {
+                   //rightTurn = 0f;
 				}			
 				this.transform.parent.GetComponent<CollisionAvoidenceTestMove> ().swerve (Quaternion.AngleAxis (leftTurn - rightTurn, new Vector3 (0f, 1f, 0f)));
-			
 			}
 		}
 		else if (this.transform.parent.GetComponent<BasicHuman>())
@@ -51,31 +167,30 @@ public class CollisionAvoidence : MonoBehaviour {
 			{
 				if (leftTurn > 0f) 
 				{
-					leftTurn -= turnSpeed;
+                    Debug.Log("DECREASInGTURN");
+                    leftTurn -= turnSpeed;
 				}
 				else 
 				{
+                    Debug.Log("UNTURN");
 					leftTurn = 0f;
 				}
 				if (rightTurn > 0f) 
 				{
-					rightTurn -= turnSpeed;
+                    Debug.Log("DECREASInGTURN");
+                    rightTurn -= turnSpeed;
 				} 
 				else
-				{
-					rightTurn = 0f;
+                {
+                    Debug.Log("UNTURN");
+                    rightTurn = 0f;
 				}			
-				this.transform.parent.GetComponent<BasicHuman> ().setSwerve (Quaternion.AngleAxis (leftTurn - rightTurn, new Vector3 (0f, 1f, 0f)));
+				this.transform.parent.GetComponent<BasicHuman> ().setSwerve (Quaternion.AngleAxis (leftTurn + rightTurn, new Vector3 (0f, 1f, 0f)));
 				
 			}
 		}
 
-	}
-
-	void OnTriggerEnter(Collider other)
-	{
-
-		if (other.name != "Ground" && other.tag != "Node") 
+    if (other.name != "Ground" && other.tag != "Node") 
 		{
 			if(this.transform.parent.GetComponent<CollisionAvoidenceTestMove>())
 			{
@@ -88,11 +203,8 @@ public class CollisionAvoidence : MonoBehaviour {
 			turning = true;
 		}
 
-	}
 
-	void OnTriggerStay(Collider other)
-	{
-		turning = true;
+    turning = true;
 		if (other.name != "Ground" && other.tag != "CollisionBox" && other.tag != "Node") 
 		{
 			if (this.name.Contains ("Left"))
@@ -114,11 +226,9 @@ public class CollisionAvoidence : MonoBehaviour {
 				this.transform.parent.GetComponent<BasicHuman> ().setSwerve (Quaternion.AngleAxis (leftTurn - rightTurn, new Vector3 (0f, 1f, 0f)));	
 			}
 		}
-	}
 
-	void OnTriggerExit(Collider other)
-	{
-		if (transform.parent.GetComponent<CollisionAvoidenceTestMove> ())
+
+    if (transform.parent.GetComponent<CollisionAvoidenceTestMove> ())
 		{
 			this.transform.parent.GetComponent<CollisionAvoidenceTestMove> ().potentialCollisions.Remove (other.gameObject);
 		}
@@ -140,7 +250,7 @@ public class CollisionAvoidence : MonoBehaviour {
 				//rightTurn = 0f;
 				//this.transform.parent.GetComponent<CollisionAvoidenceTestMove> ().swerve (Quaternion.AngleAxis (rightTurn, new Vector3 (0f, 1f, 0f)));
 			}
-
 		}
 	}
-}
+
+*/

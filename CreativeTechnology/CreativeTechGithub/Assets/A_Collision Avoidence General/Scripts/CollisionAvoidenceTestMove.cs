@@ -50,7 +50,7 @@ public class CollisionAvoidenceTestMove : MonoBehaviour {
 		}
 
 		this.transform.LookAt (this.transform.position + velocity);
-		if (closestObstacle > 0 && closestObstacle < speed) 
+		if (closestObstacle > 0 && closestObstacle < speed)
 		{
 			velocity = swerveAngle * (Vector3.Normalize (target - this.transform.position) * closestObstacle);
 		} 
