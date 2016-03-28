@@ -8,8 +8,8 @@ public class ClickToMove : MonoBehaviour {
 	public GameObject ground;
 	public GameObject node;
 	public GameObject unitToMove;
-	GameObject humanNode;
-	GameObject destinationNode;
+    GameObject humanObj;
+	GameObject destinationObj;
 	NetworkBuild _networkbuild;
 	Stack<GameObject> _path;
 
@@ -52,23 +52,28 @@ public class ClickToMove : MonoBehaviour {
 			if(unit != null)
 			{
 				Debug.Log("YOU SET A DESTINATION");
-				destinationNode = (GameObject)Instantiate(node, mouseClick.point, Quaternion.identity);
-				destinationNode.transform.name = "DESTINATION";
-				humanNode = (GameObject)Instantiate(node, unit.transform.position, Quaternion.identity);
-				humanNode.transform.name = "START";
-				destinationNode.GetComponent<Node>().addNodes();
-				humanNode.GetComponent<Node>().addNodes();
+				destinationObj = (GameObject)Instantiate(node, mouseClick.point, Quaternion.identity);
+                destinationObj.transform.name = "DESTINATION";
+                humanObj = (GameObject)Instantiate(node, unit.transform.position, Quaternion.identity);
+                humanObj.transform.name = "START";
+                destinationObj.GetComponent<Node>().addNodes();
+                humanObj.GetComponent<Node>().addNodes();
 			}
 		}
 
-		if(destinationNode != null && destinationNode.GetComponent<Node>().connectedNodes.Count > 0 && humanNode != null  && humanNode.GetComponent<Node>().connectedNodes.Count > 0)
+		if(destinationObj != null && destinationObj.GetComponent<Node>().connectedNodes.Count > 0 && humanObj != null  && humanObj.GetComponent<Node>().connectedNodes.Count > 0)
 		{
-			unit.GetComponent<BasicHuman>().destPos = destinationNode.transform.position;
-			//unit.GetComponent<BasicHuman>().path = new Stack<GameObject>(FindObjectOfType<FixPathfindingPlease>().buildPath(humanNode, destinationNode));
-			unit.GetComponent<BasicHuman>().pathList = new List<GameObject>(FindObjectOfType<FixPathfindingPlease>().buildPath(humanNode, destinationNode));
-			Destroy(destinationNode);
+			unit.GetComponent<BasicHuman>().destPos = destinationObj.transform.position;
+            //unit.GetComponent<BasicHuman>().path = new Stack<GameObject>(FindObjectOfType<FixPathfindingPlease>().buildPath(humanNode, destinationNode));
+            Node humanNode, destinationNode;
+            humanNode = new Node();
+            humanNode = humanObj.GetComponent<Node>();
+            destinationNode = new Node();
+            destinationNode = humanObj.GetComponent<Node>();
+            unit.GetComponent<BasicHuman>().pathList = new List<Vector3>(FindObjectOfType<FixPathfindingPlease>().callBuildPath(humanNode, destinationNode));
+            Destroy(destinationObj);
 			destinationNode = null;
-			Destroy(humanNode);
+			Destroy(humanObj);
 			humanNode = null;
 		}
 

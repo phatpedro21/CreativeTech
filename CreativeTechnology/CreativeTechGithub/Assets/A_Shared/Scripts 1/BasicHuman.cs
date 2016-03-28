@@ -18,13 +18,23 @@ public class BasicHuman : MonoBehaviour {
 
 	public List<GameObject> potentialCollisions = new List<GameObject> ();
 
-	public List<GameObject> pathList;
+	public List<Vector3> pathList;
 
 	public int humanNo;
 
-	public Vector3 destPos;
 
-	public Stack<GameObject> path;
+    public Vector3 destPos;
+    Vector3? currentTargetPos;
+ 
+
+    //For the pathfinding smoothing, this will hold the next node if it can be seen from current pos;
+    RaycastHit _nodeSearch;
+    //index of 'seeable' node
+    int checkTarget = 1;
+
+
+
+    public Stack<GameObject> path;
 	GameObject target;
 
 	//POST VO OBJECT WORK
@@ -33,14 +43,30 @@ public class BasicHuman : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
 	{
+        currentTargetPos = null;
 		_thisRigidbody = GetComponent<Rigidbody> ();	
 	}
 	
 	// Update is called once per frame
 	void Update () 
 	{
-	    transform.LookAt (this.transform.position + swerve * desiredVely);
-		if (pathList.Count > 0 && pathList[0] == null) 
+
+       
+        if (currentTargetPos != null && Vector3.Distance(transform.position, (Vector3)currentTargetPos) >= 1) 
+        {
+            Debug.Log("MOVING");
+            desiredVely = Vector3.Normalize((Vector3)currentTargetPos - transform.position);
+        }
+        else if (pathList.Count > 0)
+        {
+            Debug.Log("FINDING TARGET");
+            StartCoroutine(findTarget());
+            // Debug.Log("LOOKING");
+            
+        }
+
+        transform.LookAt (this.transform.position + swerve * desiredVely);
+		/*if (pathList.Count > 0 && pathList[0] == null) 
 		{
 			pathList.RemoveAt(0);	
 			for(int i = 0; i < pathList.Count - 2; i ++)
@@ -83,9 +109,9 @@ public class BasicHuman : MonoBehaviour {
 			//POST VO OBJECT WORK
 			desiredVely = swerve * Vector3.Normalize (target.transform.position - this.transform.position) * speed; 
 			//Debug.Log (Vector3.Distance (this.transform.position, target.transform.position));
-		}
+		}*/
 
-	}
+    }
 
 	void FixedUpdate()
 	{
@@ -126,6 +152,64 @@ public class BasicHuman : MonoBehaviour {
 	{
 		destination = l_destination;
 	}
+
+    IEnumerator findTarget()
+    {
+        while (checkTarget < pathList.Count - 1)
+        {
+            //int layerMask = (1 << 8) | (1 << 9);
+            //pathList[checkTarget].layer = 8;
+            Physics.Raycast(transform.position, (pathList[checkTarget] - transform.position), out _nodeSearch);
+            if (_nodeSearch.collider.transform.position != pathList[checkTarget])
+            {
+                Debug.Log("Hit obstacle" + _nodeSearch.collider.name);                
+                currentTargetPos = pathList[checkTarget - 1];
+                pathList.RemoveRange(1, checkTarget - 1);
+                checkTarget = 1;
+                Debug.DrawLine(transform.position, (Vector3)currentTargetPos, Color.red, 4);
+                yield break;
+            }
+            if (_nodeSearch.collider.gameObject.layer == 8)
+            {
+                
+            }
+            else
+            {
+                Debug.Log("WHAT?");
+                if (_nodeSearch.collider)
+                {
+                    Debug.Log(_nodeSearch.collider.name);
+                }
+            }            
+            checkTarget++;  
+                   
+            
+        }
+        currentTargetPos = destPos;
+        Debug.DrawLine(transform.position, (Vector3)currentTargetPos, Color.red, 4);
+        pathList.Clear();
+        yield break;    
+
+           /* if (!(_nodeSearch.collider.name.Contains("Node")))
+            {
+                Debug.Log("MOVING TO " + pathList[checkTarget].name);
+                currentTargetPos = pathList[checkTarget].transform.position;
+                pathList.RemoveRange(1, checkTarget);
+                checkTarget = 1;
+                Debug.DrawLine(transform.position, (Vector3)currentTargetPos, Color.red, 4);                
+                yield break;
+            }
+            pathList[checkTarget].layer = 0;
+            yield return null;
+
+            checkTarget++;
+        }
+       
+        currentTargetPos = destPos;
+        pathList.Clear();
+        yield break;
+        */
+    }
 
 	void OnDrawGizmos ()
 	{

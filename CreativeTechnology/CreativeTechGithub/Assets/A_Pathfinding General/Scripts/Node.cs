@@ -20,6 +20,7 @@ public class Node : MonoBehaviour {
 	List<GameObject> knownNodes = new List<GameObject> ();
 	public List<GameObject> connectedNodes = new List<GameObject>();
 	public List<float> pathCosts = new List<float>();
+    public Vector3 position;
 
 	//Holds amount of nodes 'before' a new one is added, for checking if it needs to update connectedNodes list
 	int nodes;
@@ -31,6 +32,7 @@ public class Node : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
+        position = transform.position;
 		addNodes ();
 		if (this.tag == "EndNode") 
 		{
