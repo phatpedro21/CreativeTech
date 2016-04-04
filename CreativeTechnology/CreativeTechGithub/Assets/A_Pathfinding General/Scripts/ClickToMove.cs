@@ -29,13 +29,12 @@ public class ClickToMove : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
-
+		//For finding what has been clicked
 		Ray mousePosToGround = Camera.main.ScreenPointToRay(Input.mousePosition);
 		RaycastHit mouseClick;
-		Debug.DrawRay (mousePosToGround.origin, mousePosToGround.direction, Color.red);
-
 		Physics.Raycast (mousePosToGround, out mouseClick, 100.0f);
 
+		//If left click, select human is poosible
 		if (Input.GetMouseButtonDown (0))
 		{
 			if (mouseClick.collider.tag == "Human") {
@@ -47,6 +46,7 @@ public class ClickToMove : MonoBehaviour {
 				unit = mouseClick.collider.transform.parent.gameObject;
 			}
 		}
+		//If right click, set destination if poosible
 		if (Input.GetMouseButtonDown (1))
 		{
 			if(unit != null)
@@ -61,16 +61,18 @@ public class ClickToMove : MonoBehaviour {
 			}
 		}
 
+
+		//If a unit is selected and there is a destination, build a path for selected human
 		if(destinationObj != null && destinationObj.GetComponent<Node>().connectedNodes.Count > 0 && humanObj != null  && humanObj.GetComponent<Node>().connectedNodes.Count > 0)
 		{
 			unit.GetComponent<BasicHuman>().destPos = destinationObj.transform.position;
             //unit.GetComponent<BasicHuman>().path = new Stack<GameObject>(FindObjectOfType<FixPathfindingPlease>().buildPath(humanNode, destinationNode));
-            GameObject humanNode, destinationNode;
+            //GameObject humanNode, destinationNode;
             //humanNode = new GameObject();
-           // humanNode = Instantiate(humanObj);
+            //humanNode = Instantiate(humanObj);
             //destinationNode = new GameObject();
             //destinationNode = Instantiate(destinationObj);
-            unit.GetComponent<BasicHuman>().pathList = new List<Vector3>(FindObjectOfType<FixPathfindingPlease>().callBuildPath(humanObj, destinationObj));
+            unit.GetComponent<BasicHuman>().pathList = new List<Vector3>(FindObjectOfType<FixPathfindingPlease>().callBuildPath(humanObj, destinationObj, unit));
             //Destroy(destinationObj);			
 			//Destroy(humanObj);			
 		}
@@ -89,5 +91,11 @@ public class ClickToMove : MonoBehaviour {
 		//unit.GetComponent<>
 
 	 
+	}
+
+	public void destroyNodes()
+	{
+		Destroy(destinationObj);			
+		Destroy(humanObj);
 	}
 }

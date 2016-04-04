@@ -31,14 +31,13 @@ public class FixPathfindingPlease : MonoBehaviour {
 	
 	}
 
-    public Stack<Vector3> callBuildPath(GameObject _startNode, GameObject _endNode)
+	public Stack<Vector3> callBuildPath(GameObject _startNode, GameObject _endNode, GameObject unit)
     {
-        StartCoroutine(buildPath(_startNode, _endNode));
+        StartCoroutine(buildPath(_startNode, _endNode, unit));
         return path;
-
     }
 
-	IEnumerator  buildPath (GameObject _startNode, GameObject _endNode)
+	IEnumerator  buildPath (GameObject _startNode, GameObject _endNode, GameObject unit)
 	{
         startTime = Time.realtimeSinceStartup;
         //CLEAR ALL
@@ -97,8 +96,7 @@ public class FixPathfindingPlease : MonoBehaviour {
 					{
                         values[activeNodes.IndexOf(node.GetComponent<Node>())] = new KeyValuePair<Node, float>(currentNode.GetComponent<Node>(),
                             values[activeNodes.IndexOf(currentNode)].Value + currentNode.GetComponent<Node>().pathCosts[i] + Vector3.Distance(currentNode.transform.position, endNode.transform.position));
-
-                        
+						                      
 					}
 
 					i++;
@@ -142,14 +140,16 @@ public class FixPathfindingPlease : MonoBehaviour {
 		{
             currentNode = values[activeNodes.IndexOf(currentNode)].Key;           
             path.Push(currentNode.position);
-            yield return null;
+			yield return null;
 		}
         //path.Push(startNode);
 
-        Destroy(endNode);
-        Destroy(startNode);
+		FindObjectOfType<ClickToMove> ().destroyNodes();      
         endTime = Time.realtimeSinceStartup;
-        Debug.Log(endTime - startTime); 
+        Debug.Log(endTime - startTime);
+		unit.GetComponent<BasicHuman>().pathList = new List<Vector3>(path);
+		Debug.Break ();
+
 		
 	}
 

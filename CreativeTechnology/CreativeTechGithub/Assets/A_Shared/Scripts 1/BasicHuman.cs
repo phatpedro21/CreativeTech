@@ -52,7 +52,7 @@ public class BasicHuman : MonoBehaviour {
 	{
 
        
-        if (currentTargetPos != null && Vector3.Distance(transform.position, (Vector3)currentTargetPos) >= 1) 
+        /*if (currentTargetPos != null && Vector3.Distance(transform.position, (Vector3)currentTargetPos) >= 1) 
         {
             Debug.Log("MOVING");
             desiredVely = Vector3.Normalize((Vector3)currentTargetPos - transform.position);
@@ -63,7 +63,12 @@ public class BasicHuman : MonoBehaviour {
             StartCoroutine(findTarget());
             // Debug.Log("LOOKING");
             
-        }
+        }*/
+
+		for(int i = 0; i < pathList.Count - 1; i++)
+		{
+			Debug.DrawLine(pathList[i], pathList[i+1], Color.blue, 3f);
+		}
 
         transform.LookAt (this.transform.position + swerve * desiredVely);
 		/*if (pathList.Count > 0 && pathList[0] == null) 
