@@ -65,16 +65,14 @@ public class ClickToMove : MonoBehaviour {
 		{
 			unit.GetComponent<BasicHuman>().destPos = destinationObj.transform.position;
             //unit.GetComponent<BasicHuman>().path = new Stack<GameObject>(FindObjectOfType<FixPathfindingPlease>().buildPath(humanNode, destinationNode));
-            Node humanNode, destinationNode;
-            humanNode = new Node();
-            humanNode = humanObj.GetComponent<Node>();
-            destinationNode = new Node();
-            destinationNode = humanObj.GetComponent<Node>();
-            unit.GetComponent<BasicHuman>().pathList = new List<Vector3>(FindObjectOfType<FixPathfindingPlease>().callBuildPath(humanNode, destinationNode));
-            Destroy(destinationObj);
-			destinationNode = null;
-			Destroy(humanObj);
-			humanNode = null;
+            GameObject humanNode, destinationNode;
+            //humanNode = new GameObject();
+           // humanNode = Instantiate(humanObj);
+            //destinationNode = new GameObject();
+            //destinationNode = Instantiate(destinationObj);
+            unit.GetComponent<BasicHuman>().pathList = new List<Vector3>(FindObjectOfType<FixPathfindingPlease>().callBuildPath(humanObj, destinationObj));
+            //Destroy(destinationObj);			
+			//Destroy(humanObj);			
 		}
 
 

@@ -31,14 +31,14 @@ public class FixPathfindingPlease : MonoBehaviour {
 	
 	}
 
-    public Stack<Vector3> callBuildPath(Node _startNode, Node _endNode)
+    public Stack<Vector3> callBuildPath(GameObject _startNode, GameObject _endNode)
     {
         StartCoroutine(buildPath(_startNode, _endNode));
         return path;
 
     }
 
-	IEnumerator  buildPath (Node _startNode, Node _endNode)
+	IEnumerator  buildPath (GameObject _startNode, GameObject _endNode)
 	{
         startTime = Time.realtimeSinceStartup;
         //CLEAR ALL
@@ -48,8 +48,8 @@ public class FixPathfindingPlease : MonoBehaviour {
 		path.Clear();
 		values.Clear ();
 		//Initialise
-		startNode = _startNode;
-        endNode = _endNode;       
+		startNode = _startNode.GetComponent<Node>();
+        endNode = _endNode.GetComponent<Node>();       
 		List<GameObject> totalNodes = new List<GameObject>();
 		totalNodes.AddRange(GameObject.FindGameObjectsWithTag ("Node"));
 		for (int i = 0; i < totalNodes.Count; i++) 
@@ -146,7 +146,8 @@ public class FixPathfindingPlease : MonoBehaviour {
 		}
         //path.Push(startNode);
 
-
+        Destroy(endNode);
+        Destroy(startNode);
         endTime = Time.realtimeSinceStartup;
         Debug.Log(endTime - startTime); 
 		
