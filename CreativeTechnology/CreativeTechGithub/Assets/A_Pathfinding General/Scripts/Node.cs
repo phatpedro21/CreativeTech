@@ -21,6 +21,8 @@ public class Node : MonoBehaviour {
 	public List<GameObject> connectedNodes = new List<GameObject>();
 	public List<float> pathCosts = new List<float>();
     public Vector3 position;
+	static float s_checkRadius;
+	public float checkRadius;
 
 	//Holds amount of nodes 'before' a new one is added, for checking if it needs to update connectedNodes list
 	int nodes;
@@ -39,6 +41,7 @@ public class Node : MonoBehaviour {
 			FindObjectOfType<NetworkBuild>().buildPath();			
 			Destroy(this.gameObject);
 		}
+		checkRadius = s_checkRadius;
 	}
 
 	void OnEnable()
@@ -50,6 +53,7 @@ public class Node : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
+		
 		addNodes ();
 
 		for (int i = 0; i < knownNodes.Count; i++) 
@@ -82,10 +86,10 @@ public class Node : MonoBehaviour {
 		int prevKnowNodesCount = knownNodes.Count;
 		knownNodes.Clear ();	
 
-		Collider[] adjacentNodes = Physics.OverlapSphere (this.transform.position, 7.7f);
+		Collider[] adjacentNodes = Physics.OverlapSphere (this.transform.position, checkRadius);
 		foreach (Collider node in adjacentNodes) 
 		{
-			if(node.tag == "Node" && node.gameObject != this.gameObject && node.GetComponent<Node>().enabled == true)
+			if((node.tag == "Node" || node.tag == "ANode" || node.tag == "BNode" || node.tag == "CNode") && node.gameObject != this.gameObject && node.GetComponent<Node>().enabled == true)
 			{
 				knownNodes.Add(node.gameObject);
 			}
@@ -147,6 +151,15 @@ public class Node : MonoBehaviour {
 
 		//Says Hello!		
 		this.enabled = true;
+	}
+
+
+	public void setCheckRadius(float radius)
+	{
+		if (s_checkRadius == 0) 
+		{
+			s_checkRadius = radius;
+		}
 	}
 
 

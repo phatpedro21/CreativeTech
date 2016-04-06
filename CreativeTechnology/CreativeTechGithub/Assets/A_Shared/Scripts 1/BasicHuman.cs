@@ -16,6 +16,9 @@ public class BasicHuman : MonoBehaviour {
 	public Vector3 testVec =  Vector3.zero;
 	public int speed = 2;
 
+	//Human Needs
+	public float needA, needB, needC;
+
 	public List<GameObject> potentialCollisions = new List<GameObject> ();
 
 	public List<Vector3> pathList;
@@ -30,7 +33,7 @@ public class BasicHuman : MonoBehaviour {
     //For the pathfinding smoothing, this will hold the next node if it can be seen from current pos;
     RaycastHit _nodeSearch;
     //index of 'seeable' node
-    int checkTarget = 1;
+    int checkTarget = 0;
 
 
 
@@ -45,12 +48,59 @@ public class BasicHuman : MonoBehaviour {
 	{
         currentTargetPos = null;
 		_thisRigidbody = GetComponent<Rigidbody> ();	
+
+		needA = Random.Range (0, 20);
+		needB = Random.Range (1, 20);
+		needC = Random.Range (1, 20);
 	}
 	
 	// Update is called once per frame
 	void Update () 
 	{
+		//NEEDS FULFILMENT DECREASING
+		//needA -= 0.1f;
+		//needB -= 0.1f;
+		//needC -= 0.1f;
 
+		//If need hits 0, find a target which fulfils need
+		if (humanNo == 0) 
+		{
+			if (needA <= 0)
+			{	
+				humanNo = 1;
+				GameObject destination, currentLocation;
+				currentLocation = (GameObject)Instantiate (FindObjectOfType<ClickToMove> ().node, transform.position, Quaternion.identity);
+				currentLocation.name = "START";
+				GameObject chosenTarget = GameObject.FindGameObjectsWithTag ("ANode") [Random.Range (0, GameObject.FindGameObjectsWithTag ("ANode").Length)];
+				destination = (GameObject)Instantiate (chosenTarget, chosenTarget.transform.position, Quaternion.identity);
+				currentLocation.GetComponent<Node> ().addNodes ();
+				destination.GetComponent<Node> ().addNodes ();
+
+				FindObjectOfType<FixPathfindingPlease> ().callBuildPath (currentLocation, destination, gameObject);
+				Destroy (currentLocation);
+				Destroy (destination);
+
+				destPos = chosenTarget.transform.position;
+			} 
+			else if (needB <= 0)
+			{
+				currentTargetPos = Vector3.zero;
+				FindObjectOfType<FixPathfindingPlease> ().callBuildPath ((GameObject)Instantiate (FindObjectOfType<ClickToMove> ().node, transform.position, Quaternion.identity), GameObject.FindGameObjectsWithTag ("ANode") [Random.Range (0, GameObject.FindGameObjectsWithTag ("BNode").Length)], gameObject);
+			}
+			else if (needC <= 0) 
+			{
+				currentTargetPos = Vector3.zero;
+				FindObjectOfType<FixPathfindingPlease> ().callBuildPath ((GameObject)Instantiate (FindObjectOfType<ClickToMove> ().node, transform.position, Quaternion.identity), GameObject.FindGameObjectsWithTag ("ANode") [Random.Range (0, GameObject.FindGameObjectsWithTag ("CNode").Length)], gameObject);
+			}
+		}
+
+			
+
+
+		for (int i = 0; i < pathList.Count - 1; i++)
+		{
+			Debug.DrawLine (pathList [i], pathList [i + 1], Color.blue);
+		}
        
         if (currentTargetPos != null && Vector3.Distance(transform.position, (Vector3)currentTargetPos) >= 1) 
         {
@@ -61,8 +111,7 @@ public class BasicHuman : MonoBehaviour {
         {
             Debug.Log("FINDING TARGET");
             StartCoroutine(findTarget());
-            // Debug.Log("LOOKING");
-            
+            // Debug.Log("LOOKING");            
         }
 
         transform.LookAt (this.transform.position + swerve * desiredVely);
@@ -160,19 +209,19 @@ public class BasicHuman : MonoBehaviour {
             //int layerMask = (1 << 8) | (1 << 9);
             //pathList[checkTarget].layer = 8;
             Physics.Raycast(transform.position, (pathList[checkTarget] - transform.position), out _nodeSearch);
-            if (_nodeSearch.collider.transform.position != pathList[checkTarget])
+			if (_nodeSearch.collider != null && _nodeSearch.collider.tag == "Obstacle" )
             {
-                Debug.Log("Hit obstacle" + _nodeSearch.collider.name);                
+                Debug.Log("Hit obstacle" + _nodeSearch.collider.name);
+				if (checkTarget == 0) 
+				{
+					checkTarget = 1;
+				}
                 currentTargetPos = pathList[checkTarget - 1];
-                pathList.RemoveRange(1, checkTarget - 1);
-                checkTarget = 1;
+				pathList.RemoveRange(0, checkTarget - 1);
+                checkTarget = 0;
                 Debug.DrawLine(transform.position, (Vector3)currentTargetPos, Color.red, 4);
                 yield break;
-            }
-            if (_nodeSearch.collider.gameObject.layer == 8)
-            {
-                
-            }
+            }         
             else
             {
                 Debug.Log("WHAT?");
@@ -182,11 +231,11 @@ public class BasicHuman : MonoBehaviour {
                 }
             }            
             checkTarget++;  
-                   
-            
+			yield return null;            
         }
-        currentTargetPos = destPos;
+		currentTargetPos = destPos;
         Debug.DrawLine(transform.position, (Vector3)currentTargetPos, Color.red, 4);
+		checkTarget = 0;
         pathList.Clear();
         yield break;    
 

@@ -13,7 +13,8 @@ public class FixPathfindingPlease : MonoBehaviour {
 	Stack<Vector3> path = new Stack<Vector3>();
 	KeyValuePair<Node, float> bestPair;
 
-    Node startNode, endNode, currentNode;
+	GameObject startObj, endObj;
+	Node startNode, endNode, currentNode;
 
 
     //DEBUG TIMER
@@ -31,16 +32,15 @@ public class FixPathfindingPlease : MonoBehaviour {
 	
 	}
 
-    public Stack<Vector3> callBuildPath(Node _startNode, Node _endNode)
+	public void callBuildPath(GameObject _startNode, GameObject _endNode, GameObject _unit)
     {
-        StartCoroutine(buildPath(_startNode, _endNode));
-        return path;
-
+        StartCoroutine(buildPath(_startNode, _endNode, _unit));    
     }
 
-	IEnumerator  buildPath (Node _startNode, Node _endNode)
+	IEnumerator buildPath (GameObject _startNode, GameObject _endNode, GameObject _unit)
 	{
-        startTime = Time.realtimeSinceStartup;
+
+		startTime = Time.realtimeSinceStartup;
         //CLEAR ALL
         activeNodes.Clear();
 		remainingNodes.Clear();
@@ -48,10 +48,19 @@ public class FixPathfindingPlease : MonoBehaviour {
 		path.Clear();
 		values.Clear ();
 		//Initialise
-		startNode = _startNode;
-        endNode = _endNode;       
+		startObj = (GameObject)Instantiate(_startNode, _startNode.transform.position, Quaternion.identity);
+		endObj = (GameObject)Instantiate (_endNode, _endNode.transform.position, Quaternion.identity);
+		endNode = endObj.GetComponent<Node> ();
+		startNode = startObj.GetComponent<Node>();
+		endNode.addNodes ();
+		startNode.addNodes ();
+		yield return null;
+     
 		List<GameObject> totalNodes = new List<GameObject>();
 		totalNodes.AddRange(GameObject.FindGameObjectsWithTag ("Node"));
+		totalNodes.AddRange(GameObject.FindGameObjectsWithTag ("ANode"));
+		totalNodes.AddRange(GameObject.FindGameObjectsWithTag ("BNode"));
+		totalNodes.AddRange(GameObject.FindGameObjectsWithTag ("CNode"));
 		for (int i = 0; i < totalNodes.Count; i++) 
 		{
             if(totalNodes[i].GetComponent<Node>().enabled == true)
@@ -75,7 +84,6 @@ public class FixPathfindingPlease : MonoBehaviour {
 			}
 		}
 
-
 		//currentNode begins as startNode
 		currentNode = startNode;
 
@@ -87,21 +95,21 @@ public class FixPathfindingPlease : MonoBehaviour {
 			{
 				//check the value for the path to each connected node. If it needs to be updated, update it
 				//i for foreach loop
-				int i = 0;
+				int iter = 0;
 				foreach (GameObject node in currentNode.GetComponent<Node>().connectedNodes)
 				{
-
-					//if not yet been set, or value from this node is less than existing
-					if(values[activeNodes.IndexOf(node.GetComponent<Node>())].Value == -1.0f ||
-					   (values[activeNodes.IndexOf(currentNode)].Value + currentNode.GetComponent<Node>().pathCosts[i])  < values[activeNodes.IndexOf(node.GetComponent<Node>())].Value)
+					
+					if (endObj != null) 
 					{
-                        values[activeNodes.IndexOf(node.GetComponent<Node>())] = new KeyValuePair<Node, float>(currentNode.GetComponent<Node>(),
-                            values[activeNodes.IndexOf(currentNode)].Value + currentNode.GetComponent<Node>().pathCosts[i] + Vector3.Distance(currentNode.transform.position, endNode.transform.position));
-
-                        
+						//if not yet been set, or value from this node is less than existing
+						if (values [activeNodes.IndexOf (node.GetComponent<Node> ())].Value == -1.0f ||
+						  values [activeNodes.IndexOf (currentNode)].Value + currentNode.GetComponent<Node> ().pathCosts [iter] + Vector3.Distance (currentNode.GetComponent<Node> ().connectedNodes [iter].transform.position, endObj.transform.position) < values [activeNodes.IndexOf (node.GetComponent<Node> ())].Value)
+						{
+							values [activeNodes.IndexOf (node.GetComponent<Node> ())] = new KeyValuePair<Node, float> (currentNode.GetComponent<Node> (),
+								values [activeNodes.IndexOf (currentNode)].Value + currentNode.GetComponent<Node> ().pathCosts [iter] + Vector3.Distance (currentNode.transform.position, endNode.transform.position));
+						                        
+						}
 					}
-
-					i++;
 				}
 			}
 
@@ -110,6 +118,7 @@ public class FixPathfindingPlease : MonoBehaviour {
 			{
 				//LEAVE FOR LATER
 				Debug.Log("No route from here");
+				break;
 
 			}
 
@@ -132,24 +141,26 @@ public class FixPathfindingPlease : MonoBehaviour {
 
 			currentNode = bestPair.Key;
 			visitedNodes.Add (currentNode);
-			remainingNodes.Remove (currentNode);
-            yield return null;
+			remainingNodes.Remove (currentNode);    
+			yield return null;
 		}
+		endTime = Time.realtimeSinceStartup;
+		Debug.Log("PathBuild" + (endTime - startTime)); 
 
 		path.Push(endNode.position);
 		currentNode = endNode;
 		while(currentNode != startNode)
 		{
             currentNode = values[activeNodes.IndexOf(currentNode)].Key;           
-            path.Push(currentNode.position);
-            yield return null;
+            path.Push(currentNode.position);            
 		}
         //path.Push(startNode);
-
-
         endTime = Time.realtimeSinceStartup;
         Debug.Log(endTime - startTime); 
-		
+		_unit.GetComponent<BasicHuman> ().pathList = new List<Vector3> (path);	
+		Destroy (startObj);
+		Destroy (endObj);
+
 	}
 
 }
