@@ -112,7 +112,6 @@ public class FixPathfindingPlease : MonoBehaviour {
 					}
 				}
 			}
-
 			//else find another node to look from
 			else
 			{
@@ -123,7 +122,6 @@ public class FixPathfindingPlease : MonoBehaviour {
 			}
 
 			bestPair = new KeyValuePair<Node, float> (null, -1);
-			
 			for (int i = 0; i < values.Count; i++) 
 			{
 				if (!visitedNodes.Contains (activeNodes [i])) 

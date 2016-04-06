@@ -208,7 +208,8 @@ public class BasicHuman : MonoBehaviour {
         {
             //int layerMask = (1 << 8) | (1 << 9);
             //pathList[checkTarget].layer = 8;
-            Physics.Raycast(transform.position, (pathList[checkTarget] - transform.position), out _nodeSearch);
+            Physics.Raycast(this.transform.position, (pathList[checkTarget] - transform.position), out _nodeSearch);
+			Debug.DrawRay (this.transform.position, (pathList [checkTarget] - transform.position), Color.white, 3f);
 			if (_nodeSearch.collider != null && _nodeSearch.collider.tag == "Obstacle" )
             {
                 Debug.Log("Hit obstacle" + _nodeSearch.collider.name);
