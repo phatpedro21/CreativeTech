@@ -4,7 +4,7 @@ using System.Collections;
 public class CollisionManager : MonoBehaviour {
 
     public float turnSpeed;
-    float angleR, angleL;
+    public float angleR, angleL;
     public bool turningRight, turningLeft;
  
 
@@ -18,7 +18,7 @@ public class CollisionManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        if (turningRight)
+		if (turningRight  && angleR < 90)
         {        
             angleR += turnSpeed;
             updateAngle((Quaternion.AngleAxis(angleR, new Vector3(0f, 1f, 0f))));
@@ -34,11 +34,10 @@ public class CollisionManager : MonoBehaviour {
             {
                 angleR = 0f;
                 updateAngle((Quaternion.AngleAxis(0, new Vector3(0f, 1f, 0f))));
-            }
-            
+            }            
 
         }
-        if (turningLeft)
+		if (turningLeft && angleL < 90)
         {
             angleL += turnSpeed;
             updateAngle((Quaternion.AngleAxis(- angleL, new Vector3(0f, 1f, 0f))));
@@ -55,17 +54,12 @@ public class CollisionManager : MonoBehaviour {
                 angleL = 0f;
                 updateAngle((Quaternion.AngleAxis(0, new Vector3(0f, 1f, 0f))));
             }
-           
-        }    
-
-       
-
-
+          }
 
     }
 
     public void updateAngle(Quaternion angle)
     {
-        transform.parent.GetComponent<BasicHuman>().setSwerve(angle);
+        transform.parent.GetComponent<AgentShowcase>().setSwerve(angle);
     }
 }

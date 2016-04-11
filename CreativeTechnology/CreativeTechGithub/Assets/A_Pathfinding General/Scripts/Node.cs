@@ -89,7 +89,7 @@ public class Node : MonoBehaviour {
 		Collider[] adjacentNodes = Physics.OverlapSphere (this.transform.position, checkRadius);
 		foreach (Collider node in adjacentNodes) 
 		{
-			if((node.tag == "Node" || node.tag == "ANode" || node.tag == "BNode" || node.tag == "CNode") && node.gameObject != this.gameObject && node.GetComponent<Node>().enabled == true)
+			if((node.tag == "Node" || node.tag == "ANode" || node.tag == "BNode" || node.tag == "CNode" || node.tag == "NullNode") && node.gameObject != this.gameObject && node.GetComponent<Node>().enabled == true)
 			{
 				knownNodes.Add(node.gameObject);
 			}
