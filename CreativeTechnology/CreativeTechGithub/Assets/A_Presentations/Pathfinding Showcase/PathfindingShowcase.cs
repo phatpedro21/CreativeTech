@@ -5,17 +5,17 @@ using System.Collections.Generic;
 public class PathfindingShowcase : MonoBehaviour {
 
 	//activeNodes gives us a reference for all nodes, visited nodes contains nodes we've checked, remainingNodes are nodes still to b echecked
-	List<Node> activeNodes = new List<Node>();
-	List<Node> visitedNodes = new List<Node>();
-	List<Node> remainingNodes = new List<Node>();
-	List<KeyValuePair<Node, float>> values = new List<KeyValuePair<Node, float>>();
+
 	//GameObject startNode, endNode, currentNode;
 	Stack<Vector3> path = new Stack<Vector3>();
 	KeyValuePair<Node, float> bestPair;
 
 
+
 	//For making pathfinding add another cost(distance to end)
 	public bool distanceCheck;
+
+	public bool yieldYes;
 
 	//For showing search space
 	public bool showCheckedNodes;
@@ -35,6 +35,11 @@ public class PathfindingShowcase : MonoBehaviour {
 	
 	IEnumerator buildPath (GameObject _startNode, GameObject _endNode, GameObject _unit)
 	{
+
+		List<Node> activeNodes = new List<Node>();
+		List<Node> visitedNodes = new List<Node>();
+		List<Node> remainingNodes = new List<Node>();
+		List<KeyValuePair<Node, float>> values = new List<KeyValuePair<Node, float>>();
 		
 		startTime = Time.realtimeSinceStartup;
 
@@ -106,27 +111,33 @@ public class PathfindingShowcase : MonoBehaviour {
 						if(!distanceCheck)
 						{
 						//if not yet been set, or value from this node is less than existing
-							if (values [activeNodes.IndexOf (node.GetComponent<Node> ())].Value == -1.0f ||
-							    (values [activeNodes.IndexOf (currentNode)].Value + currentNode.pathCosts [iter])  < values [activeNodes.IndexOf (node.GetComponent<Node> ())].Value)
+							if (node != endNode)
 							{
-								values [activeNodes.IndexOf (node.GetComponent<Node> ())] = new KeyValuePair<Node, float> (currentNode, values [activeNodes.IndexOf (currentNode)].Value + currentNode.pathCosts [iter]);
+								if (values [activeNodes.IndexOf (node.GetComponent<Node> ())].Value == -1.0f ||
+								   (values [activeNodes.IndexOf (currentNode)].Value + currentNode.pathCosts [iter]) < values [activeNodes.IndexOf (node.GetComponent<Node> ())].Value) 
+								{
+									values [activeNodes.IndexOf (node.GetComponent<Node> ())] = new KeyValuePair<Node, float> (currentNode, values [activeNodes.IndexOf (currentNode)].Value + currentNode.pathCosts [iter]);
+								}
 							}
 						}
 						if(distanceCheck)
 						{
+							float distVal = 0;
+							//distVal += (Vector3.Distance (node.GetComponent<Node> ().position, endNode.position) - Vector3.Distance (currentNode.position, endNode.position));
+							distVal += Vector3.Distance (node.GetComponent<Node> ().position, endNode.position) - Vector3.Distance (_unit.transform.position, endNode.position);
+							//distVal += Vector3.Distance (currentNode.position, _unit.transform.position);
+
 							if (values [activeNodes.IndexOf (node.GetComponent<Node> ())].Value == -1.0f ||
-							    (values [activeNodes.IndexOf (currentNode)].Value + currentNode.pathCosts [iter] + Vector3.Distance(node.GetComponent<Node>().position, endNode.position))  < values [activeNodes.IndexOf (node.GetComponent<Node> ())].Value)
+								(values [activeNodes.IndexOf (currentNode)].Value + currentNode.pathCosts [iter] + distVal)  < values [activeNodes.IndexOf (node.GetComponent<Node> ())].Value && !visitedNodes.Contains(node.GetComponent<Node>()))
 							{
-								values [activeNodes.IndexOf (node.GetComponent<Node> ())] = new KeyValuePair<Node, float> (currentNode, 
-								                                                                                           values [activeNodes.IndexOf (currentNode)].Value + currentNode.pathCosts [iter] + Vector3.Distance(node.GetComponent<Node>().position, endNode.position));
+								values [activeNodes.IndexOf (node.GetComponent<Node> ())] = new KeyValuePair<Node, float> (currentNode, (values [activeNodes.IndexOf (currentNode)].Value + currentNode.pathCosts [iter] + distVal));
+
 
 							}
 						}
 					}
 
 					iter++;
-
-
 				}
 
 			}
@@ -134,9 +145,8 @@ public class PathfindingShowcase : MonoBehaviour {
 			else
 			{
 				//LEAVE FOR LATER
-				Debug.Log("No route from here");
-				break;
-				
+				//Debug.Log("No route from here");
+				break;				
 			}
 			
 			bestPair = new KeyValuePair<Node, float> (null, -1);
@@ -159,17 +169,21 @@ public class PathfindingShowcase : MonoBehaviour {
 				}
 			}
 
-			if(showCheckedNodes)
+			if (showCheckedNodes) {
+				Debug.DrawLine(currentNode.position, bestPair.Key.position, Color.red, 10f);
+				currentNode.gameObject.GetComponent<Renderer> ().material = visitedNodeColor;
+				yield return null;
+
+			}
+			else if (yieldYes) 
 			{
-				Debug.DrawLine(currentNode.position, bestPair.Key.position, Color.red, 2f);
-				currentNode.gameObject.GetComponent<Renderer>().material = visitedNodeColor;
 				yield return null;
 			}
+
 			currentNode = bestPair.Key;
 			visitedNodes.Add (currentNode);
 
-			remainingNodes.Remove (currentNode);
-			
+			remainingNodes.Remove (currentNode);			
 		
 		}				
 		path.Push(endNode.position);
@@ -177,13 +191,18 @@ public class PathfindingShowcase : MonoBehaviour {
 		while(currentNode != startNode)
 		{
 			currentNode = values[activeNodes.IndexOf(currentNode)].Key;           
-			path.Push(currentNode.position);            
+			path.Push(currentNode.position); 
+			if (path.Count > 30)
+			{
+				yield break;
+			}
 		}
 
 		//path.Push(startNode);
 		endTime = Time.realtimeSinceStartup;
 		Debug.Log(endTime - startTime); 
-		_unit.GetComponent<AgentShowcase> ().pathList = new List<Vector3> (path);	
+		_unit.GetComponent<AgentShowcase> ().pathList = new List<Vector3> (path);
+		_unit.GetComponent<AgentShowcase> ().callFindTarget ();
 		Destroy (startObj);
 		Destroy (endObj);
 		yield break;

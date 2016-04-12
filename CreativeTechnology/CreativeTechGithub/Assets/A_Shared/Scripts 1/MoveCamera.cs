@@ -8,8 +8,8 @@ public class MoveCamera : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		moveSpeed = 0.7f;
-		zoomSpeed = 0.5f;
+		//moveSpeed = 0.7f;
+		//zoomSpeed = 0.5f;
 	
 	}
 	

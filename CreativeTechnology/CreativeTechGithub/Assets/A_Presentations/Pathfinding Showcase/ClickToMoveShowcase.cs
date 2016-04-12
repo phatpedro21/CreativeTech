@@ -33,7 +33,7 @@ public class ClickToMoveShowcase : MonoBehaviour {
 		//Finds mouse click position
 		Ray mousePosToGround = Camera.main.ScreenPointToRay(Input.mousePosition);
 		RaycastHit mouseClick;
-		Debug.DrawRay (mousePosToGround.origin, mousePosToGround.direction, Color.red);
+		//Debug.DrawRay (mousePosToGround.origin, mousePosToGround.direction * 100f, Color.red);
 		
 		Physics.Raycast (mousePosToGround, out mouseClick, 100.0f);
 		
@@ -55,8 +55,12 @@ public class ClickToMoveShowcase : MonoBehaviour {
 			//if we already have a unit selected, create a destination for this unit and create path
 			if(unit != null)
 			{
+
+				Vector3 instantiatePoint;
+				instantiatePoint = mouseClick.point;
+				instantiatePoint.y = 1;
 				//create new node at destination
-				destinationObj = (GameObject)Instantiate(node, mouseClick.point, Quaternion.identity);
+				destinationObj = (GameObject)Instantiate(node, instantiatePoint, Quaternion.identity);
 				destinationObj.transform.name = "DESTINATION";
 
 				//create new node at human position
@@ -76,11 +80,7 @@ public class ClickToMoveShowcase : MonoBehaviour {
 			FindObjectOfType<PathfindingShowcase>().callBuildPath(humanObj, destinationObj, unit);
 			Destroy(destinationObj);
 			Destroy(humanObj);
-		}	
-
-
-
-		
+		}			
 		
 	}
 }

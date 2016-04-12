@@ -113,6 +113,8 @@ public class CollisionAvoidence : MonoBehaviour {
             }
         }
 
+
+
     }
 
     void OnTriggerExit(Collider other)

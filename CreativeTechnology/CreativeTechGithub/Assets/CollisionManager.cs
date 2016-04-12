@@ -16,7 +16,8 @@ public class CollisionManager : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update () 
+	{
 
 		if (turningRight  && angleR < 90)
         {        
@@ -55,7 +56,6 @@ public class CollisionManager : MonoBehaviour {
                 updateAngle((Quaternion.AngleAxis(0, new Vector3(0f, 1f, 0f))));
             }
           }
-
     }
 
     public void updateAngle(Quaternion angle)
